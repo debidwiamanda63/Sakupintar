@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SakuPintar - Pencatat Keuangan & Omset Usaha</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen pb-12">
+
+    <!-- Container Utama -->
+    <div class="max-w-5xl mx-auto p-4 sm:p-6">
+        
+        <!-- Header -->
+        <header class="mb-6 text-center">
+            <h1 class="text-3xl font-bold text-indigo-600">SakuPintar Bisnis</h1>
+            <p class="text-sm text-slate-500">Pencatat Keuangan, Omset Usaha, Rekap Mingguan & Bulanan</p>
+        </header>
+
+        <!-- Kartu Ringkasan Saldo Global -->
+        <div class="bg-gradient-to-r from-indigo-600 to-violet-700 text-white rounded-2xl p-6 shadow-lg mb-6">
+            <p class="text-xs uppercase tracking-wider opacity-80 mb-1">Total Akumulasi Saldo / Kas Bersih</p>
+            <h2 id="total-balance" class="text-3xl sm:text-4xl font-bold mb-4">Rp 0</h2>
+            
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-indigo-400/30">
+                <div>
+                    <p class="text-xs opacity-80">Total Pemasukan</p>
+                    <p id="total-income" class="text-lg sm:text-xl font-semibold text-emerald-300">Rp 0</p>
+                </div>
+                <div>
+                    <p class="text-xs opacity-80">Total Pengeluaran</p>
+                    <p id="total-expense" class="text-lg sm:text-xl font-semibold text-rose-300">Rp 0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <!-- Form Input Transaksi -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 md:col-span-1">
+                <h3 class="font-semibold text-slate-700 mb-4">Catat Transaksi / Omset</h3>
+                
+                <form id="transaction-form" class="space-y-4">
+                    <!-- Jenis Transaksi -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Jenis Transaksi</label>
+                        <select id="type" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <option value="income">Pemasukan / Omset (+)</option>
+                            <option value="expense">Pengeluaran Operasional (-)</option>
+                        </select>
+                    </div>
+
+                    <!-- Kategori -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Kategori</label>
+                        <select id="category" class="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <option value="Omset Penjualan">Omset Penjualan</option>
+                            <option value="Modal Bahan Baku">Modal Bahan Baku</option>
+                            <option value="Operasional (Listrik/Gas/Dll)">Operasional (Listrik/Gas/Dll)</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+
+                    <!-- Keterangan -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Keterangan / Detail</label>
+                        <input type="text" id="text" placeholder="Contoh: Penjualan Harian / Beli Gas" required
+                            class="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Nominal -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Jumlah Nominal (Rp)</label>
+                        <input type="number" id="amount" placeholder="Contoh: 150000" min="1" required
+                            class="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Tanggal Transaksi -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Tanggal</label>
+                        <input type="date" id="date" required
+                            class="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Tombol Simpan -->
+                    <button type="submit" 
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition text-sm shadow-md shadow-indigo-200">
+                        Simpan Catatan
+                    </button>
+                </form>
+            </div>
+
+            <!-- Panel Rekap (Mingguan & Bulanan) -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 md:col-span-2 flex flex-col space-y-6">
+                
+                <!-- Rekap Bulanan -->
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-semibold text-slate-700 text-sm">Rekap Bulanan Usaha</h3>
+                        <span id="current-year-label" class="text-[10px] bg-indigo-50 text-indigo-600 font-medium px-2 py-0.5 rounded-lg"></span>
+                    </div>
+                    <div class="overflow-x-auto max-h-48">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-100 text-slate-400 uppercase">
+                                    <th class="py-2 px-2 font-medium">Bulan</th>
+                                    <th class="py-2 px-2 font-medium">Omset</th>
+                                    <th class="py-2 px-2 font-medium">Keluar</th>
+                                    <th class="py-2 px-2 font-medium">Laba Bersih</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthly-summary-table">
+                                <!-- Data bulanan -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Rekap Mingguan -->
+                <div class="pt-4 border-t border-slate-100">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-semibold text-slate-700 text-sm">Rekap Mingguan Bulan Ini</h3>
+                        <select id="select-summary-month" class="rounded-lg border border-slate-200 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <!-- Opsi bulan diisi JS -->
+                        </select>
+                    </div>
+                    <div class="overflow-x-auto max-h-48">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-100 text-slate-400 uppercase">
+                                    <th class="py-2 px-2 font-medium">Periode Minggu</th>
+                                    <th class="py-2 px-2 font-medium">Omset</th>
+                                    <th class="py-2 px-2 font-medium">Keluar</th>
+                                    <th class="py-2 px-2 font-medium">Laba Bersih</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weekly-summary-table">
+                                <!-- Data mingguan -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Bagian Tabel Rincian Transaksi -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                <h3 class="font-semibold text-slate-700">Tabel Rincian Transaksi</h3>
+                
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <!-- Filter Bulan -->
+                    <select id="filter-month" class="rounded-xl border border-slate-200 p-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        <option value="all">Semua Bulan</option>
+                        <option value="01">Januari</option>
+                        <option value="02">Februari</option>
+                        <option value="03">Maret</option>
+                        <option value="04">April</option>
+                        <option value="05">Mei</option>
+                        <option value="06">Juni</option>
+                        <option value="07">Juli</option>
+                        <option value="08">Agustus</option>
+                        <option value="09">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
+
+                    <button id="clear-btn" class="text-xs text-rose-500 hover:text-rose-700 font-medium px-3 py-2">Hapus Semua</button>
+                </div>
+            </div>
+
+            <!-- Tabel Rincian -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-100 text-xs text-slate-400 uppercase bg-slate-50/50">
+                            <th class="py-3 px-3 font-medium rounded-l-xl">Tanggal</th>
+                            <th class="py-3 px-3 font-medium">Kategori</th>
+                            <th class="py-3 px-3 font-medium">Keterangan</th>
+                            <th class="py-3 px-3 font-medium">Jenis</th>
+                            <th class="py-3 px-3 font-medium text-right">Nominal</th>
+                            <th class="py-3 px-3 font-medium text-center rounded-r-xl">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transaction-table-body">
+                        <!-- Baris transaksi -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pesan Kosong -->
+            <p id="empty-message" class="text-center text-xs text-slate-400 py-6 hidden">Belum ada rincian transaksi tercatat.</p>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logika Aplikasi (Aman & Terstruktur) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const balanceEl = document.getElementById('total-balance');
+            const incomeEl = document.getElementById('total-income');
+            const expenseEl = document.getElementById('total-expense');
+            const tableBodyEl = document.getElementById('transaction-table-body');
+            const monthlyTableEl = document.getElementById('monthly-summary-table');
+            const weeklyTableEl = document.getElementById('weekly-summary-table');
+            const formEl = document.getElementById('transaction-form');
+            
+            const typeEl = document.getElementById('type');
+            const categoryEl = document.getElementById('category');
+            const textEl = document.getElementById('text');
+            const amountEl = document.getElementById('amount');
+            const dateEl = document.getElementById('date');
+            const filterMonthEl = document.getElementById('filter-month');
+            const selectSummaryMonthEl = document.getElementById('select-summary-month');
+            const emptyMsgEl = document.getElementById('empty-message');
+            const clearBtnEl = document.getElementById('clear-btn');
+            const yearLabelEl = document.getElementById('current-year-label');
+
+            const today = new Date().toISOString().split('T')[0];
+            if (dateEl) dateEl.value = today;
+
+            const currentYear = new Date().getFullYear();
+            if (yearLabelEl) yearLabelEl.innerText = `Tahun ${currentYear}`;
+
+            const monthsData = [
+                { num: '01', name: 'Januari' }, { num: '02', name: 'Februari' }, { num: '03', name: 'Maret' },
+                { num: '04', name: 'April' }, { num: '05', name: 'Mei' }, { num: '06', name: 'Juni' },
+                { num: '07', name: 'Juli' }, { num: '08', name: 'Agustus' }, { num: '09', name: 'September' },
+                { num: '10', name: 'Oktober' }, { num: '11', name: 'November' }, { num: '12', name: 'Desember' }
+            ];
+
+            if (selectSummaryMonthEl) {
+                monthsData.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.num;
+                    opt.innerText = m.name;
+                    selectSummaryMonthEl.appendChild(opt);
+                });
+                const currentMonthNum = String(new Date().getMonth() + 1).padStart(2, '0');
+                selectSummaryMonthEl.value = currentMonthNum;
+            }
+
+            let transactions = [];
+            try {
+                transactions = JSON.parse(localStorage.getItem('business_transactions')) || [];
+            } catch (e) {
+                transactions = [];
+            }
+
+            function formatRupiah(number) {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                }).format(number);
+            }
+
+            function initApp() {
+                renderTable();
+                renderMonthlySummary();
+                renderWeeklySummary();
+                updateSummary();
+            }
+
+            function renderTable() {
+                if (!tableBodyEl) return;
+                tableBodyEl.innerHTML = '';
+                const selectedMonth = filterMonthEl ? filterMonthEl.value : 'all';
+
+                const filteredTransactions = transactions.filter(trx => {
+                    if (!trx.date || !trx.date.includes('-')) return false;
+                    if (selectedMonth === 'all') return true;
+                    const trxMonth = trx.date.split('-')[1]; 
+                    return trxMonth === selectedMonth;
+                });
+
+                if (filteredTransactions.length === 0) {
+                    if (emptyMsgEl) emptyMsgEl.classList.remove('hidden');
+                    return;
+                } else {
+                    if (emptyMsgEl) emptyMsgEl.classList.add('hidden');
+                }
+
+                filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                filteredTransactions.forEach((trx) => {
+                    const originalIndex = transactions.indexOf(trx);
+                    const isIncome = trx.type === 'income';
+                    const sign = isIncome ? '+' : '-';
+                    const badgeClass = isIncome ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-rose-50 text-rose-600 border-rose-200';
+                    const typeText = isIncome ? 'Pemasukan / Omset' : 'Pengeluaran';
+
+                    let formattedDate = trx.date;
+                    if (trx.date && trx.date.includes('-')) {
+                        const parts = trx.date.split('-');
+                        if (parts.length === 3) {
+                            formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                        }
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-slate-50 hover:bg-slate-50/80 transition';
+                    
+                    tr.innerHTML = `
+                        <td class="py-3 px-3 text-slate-600 whitespace-nowrap">${formattedDate}</td>
+                        <td class="py-3 px-3 font-medium text-slate-700">${trx.category || 'Lainnya'}</td>
+                        <td class="py-3 px-3 text-slate-600">${trx.text || ''}</td>
+                        <td class="py-3 px-3">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-medium border ${badgeClass}">${typeText}</span>
+                        </td>
+                        <td class="py-3 px-3 text-right font-semibold ${isIncome ? 'text-emerald-600' : 'text-rose-600'}">
+                            ${sign} ${formatRupiah(trx.amount || 0)}
+                        </td>
+                        <td class="py-3 px-3 text-center">
+                            <button onclick="deleteTransaction(${originalIndex})" class="text-slate-300 hover:text-rose-500 transition p-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </td>
+                    `;
+                    tableBodyEl.appendChild(tr);
+                });
+            }
+
+            function renderMonthlySummary() {
+                if (!monthlyTableEl) return;
+                monthlyTableEl.innerHTML = '';
+                monthsData.forEach(m => {
+                    const monthTrx = transactions.filter(trx => {
+                        if (!trx.date || !trx.date.includes('-')) return false;
+                        const [y, mm] = trx.date.split('-');
+                        return mm === m.num && parseInt(y) === currentYear;
+                    });
+
+                    const income = monthTrx.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+                    const expense = monthTrx.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount || 0), 0);
+                    const netProfit = income - expense;
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-slate-50 hover:bg-slate-50/50';
+                    tr.innerHTML = `
+                        <td class="py-2 px-2 font-medium text-slate-700">${m.name}</td>
+                        <td class="py-2 px-2 text-emerald-600 font-medium">${income > 0 ? formatRupiah(income) : '-'}</td>
+                        <td class="py-2 px-2 text-rose-600 font-medium">${expense > 0 ? formatRupiah(expense) : '-'}</td>
+                        <td class="py-2 px-2 font-semibold ${netProfit >= 0 ? 'text-indigo-600' : 'text-rose-600'}">
+                            ${monthTrx.length > 0 ? formatRupiah(netProfit) : '-'}
+                        </td>
+                    `;
+                    monthlyTableEl.appendChild(tr);
+                });
+            }
+
+            function renderWeeklySummary() {
+                if (!weeklyTableEl || !selectSummaryMonthEl) return;
+                weeklyTableEl.innerHTML = '';
+                const selectedMonth = selectSummaryMonthEl.value;
+
+                const monthTrx = transactions.filter(trx => {
+                    if (!trx.date || !trx.date.includes('-')) return false;
+                    const [y, mm] = trx.date.split('-');
+                    return mm === selectedMonth && parseInt(y) === currentYear;
+                });
+
+                const weeks = [
+                    { label: 'Minggu 1 (Tgl 1-7)', start
